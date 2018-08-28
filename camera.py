@@ -2,7 +2,7 @@ import cv2
 import os
 import sys
 import time
-import cv2.cv as cv
+import cv2
 
 if __name__ == "__main__":
 
@@ -40,17 +40,27 @@ if __name__ == "__main__":
     
 
     cap = cv2.VideoCapture(0)
-    print "Resolution:  ", str(cap.get(cv.CV_CAP_PROP_FRAME_WIDTH)),str(cap.get(cv.CV_CAP_PROP_FRAME_HEIGHT))
-    cap.set(cv.CV_CAP_PROP_FRAME_WIDTH, int(1280))
-    cap.set(cv.CV_CAP_PROP_FRAME_HEIGHT, int(720))
-    print "Resolution:  ", str(cap.get(cv.CV_CAP_PROP_FRAME_WIDTH)),str(cap.get(cv.CV_CAP_PROP_FRAME_HEIGHT))
+    print "Resolution:  ", str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    print cv2.CAP_PROP_FRAME_WIDTH, cap.set(cv2.CAP_PROP_FRAME_WIDTH,int(640))
+    print cv2.CAP_PROP_FRAME_HEIGHT, cap.set(cv2.CAP_PROP_FRAME_HEIGHT,int(480));
+    print cv2.CAP_PROP_FPS, cap.set(cv2.CAP_PROP_FPS, 120)
+
+    cap.set(15, -8.0)
+    time.sleep(2)
+
+    print "Resolution: %s x %s @ %s "%( str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), cap.get(cv2.CAP_PROP_FPS))
+
     recording = False
     print "Recording: %s" % (recording, )
     last_t = time.time()
+    frame_time = time.time()
+    num_frames = 0
     while True:
         ret, frame = cap.read()
         # Display the resulting frame
         cv2.imshow('frame',frame)
+        num_frames+=1
         k = cv2.waitKey(1)
         if k & 0xFF == ord('q'):
             break
@@ -59,6 +69,13 @@ if __name__ == "__main__":
             print "Recording: %s" % (recording, )
             if not recording:
                 print "\n\thit SPACE (in image display window) to start recording..."
+        elif k & 0xFF==ord('f'):
+            now = time.time()
+            seconds = now - frame_time
+            frame_time = now
+            fps = float(num_frames) / seconds
+            num_frames=0
+            print "Current display FPS:  %.3f" % (fps, )
         now = time.time()
         if now - last_t > lag and recording:
             out_name = os.path.join(path, "%s%.8i.jpg" % (file_prefix, ind))
