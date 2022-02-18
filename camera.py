@@ -54,8 +54,8 @@ class WebcamLapse(object):
         :return:
         """
         print("Current resolution:  %s x %s" % (
-              str(self._cam.get(cv2.CAP_PROP_FRAME_WIDTH)),
-              str(self._cam.get(cv2.CAP_PROP_FRAME_HEIGHT))))
+            str(self._cam.get(cv2.CAP_PROP_FRAME_WIDTH)),
+            str(self._cam.get(cv2.CAP_PROP_FRAME_HEIGHT))))
         if self._target_resolution is not None:
             width, height = self._target_resolution
             self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, width)
@@ -78,9 +78,9 @@ class WebcamLapse(object):
         if not os.path.exists(self._path):
             os.makedirs(self._path)
         print(self._sub_digit_str("First frame will be %s%i.%s, written to to %s") % (self._file_prefix,
-                                                                  self._ind,
-                                                                  self._img_ext,
-                                                                  self._path))
+                                                                                      self._ind,
+                                                                                      self._img_ext,
+                                                                                      self._path))
         if system == "win":
             print("Windows OS detected, attempting clean camera open...")
             self._cam = cv2.VideoCapture(self._cam_index, cv2.CAP_DSHOW)
@@ -104,7 +104,10 @@ class WebcamLapse(object):
                 time.sleep(0.2)
 
             # Display the resulting frame
-            cv2.imshow('frame', frame)
+            try:
+                cv2.imshow('frame', frame)
+            except:
+                print("Warning: Dropped frame!")
             num_frames += 1
             k = cv2.waitKey(1)
             if k & 0xFF == ord('q'):
@@ -128,7 +131,7 @@ class WebcamLapse(object):
                 cv2.imwrite(out_name, frame)
                 last_t = now
                 self._ind += 1
-                if np.log10(self._ind) >= self._digits:
+                if self._ind > 0 and np.log10(self._ind) >= self._digits:
                     self._digits += 1
 
         self._cam.release()
@@ -160,9 +163,10 @@ class WebcamLapse(object):
 def do_args():
     parser = argparse.ArgumentParser(description="Timelapse videos using webcams.")
     parser.add_argument("file_prefix", help="Prefix for each frame, can include paths.", default="frame_")
-    parser.add_argument("lag_seconds", help="Delay between each frame", default=15, type=int)
-    parser.add_argument("start_number", help="Start frame indices with this value.", default=0, type=int)
-    parser.add_argument("--camera_index", "-c", help="Device index", default=0)
+    parser.add_argument("lag_seconds", help="Delay between each frame", default=15.0, type=float)
+    parser.add_argument("--start_number", "-n", help="Start frame indices with this value (default 0).", default=0,
+                        type=int)
+    parser.add_argument("--camera_index", "-c", help="Device index", default=0, type=int)
     parser.add_argument("--type", "-t", help="Either 'png' or 'jpg'", default='jpg')
     parser.add_argument("--resolution", "-r", help="WIDTHxHEIGHT set to this resolution.", default="", type=str)
     parser.add_argument("--select_resolution", "-s", help="chose resolution interactively", action='store_true',

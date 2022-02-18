@@ -124,6 +124,7 @@ def pick_resolution(camera_index=0, no_network=False):
         return None
     return valid['widths'][selection], valid['heights'][selection]
 
+
 if __name__ == "__main__":
     # run to update cache:
     # update_common_resolutions(RESOLUTION_CACHE_FILENAME)
