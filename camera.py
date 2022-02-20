@@ -75,6 +75,11 @@ class WebcamLapse(object):
         print("Starting with image index %i." % (self._ind,))
 
         self._path, self._file_prefix = os.path.split(os.path.abspath(self._prefix))
+
+        if not self._file_prefix.endswith('_'):  # insert separating _ if user doesn't
+            self._file_prefix = "%s_" % (self._file_prefix,)
+            self._prefix = os.path.join(self._path, self._file_prefix)
+
         if not os.path.exists(self._path):
             os.makedirs(self._path)
         print(self._sub_digit_str("First frame will be %s%i.%s, written to to %s") % (self._file_prefix,
@@ -149,15 +154,19 @@ class WebcamLapse(object):
 
     def print_ffmpeg_instructions(self):
         time.sleep(1)
+        if self._ind_start > 0:
+            starting = "-start_number %s " % (self._ind_start, )
+        else:
+            starting = ""
         print("\n\nExample ffmpeg calls to combine frames into a video:")
         print("""
         30 FPS:
-            ffmpeg -start_number %s -i "%s_0%id.%s"  -vcodec libx264 output_timelapse.mp4
+            ffmpeg %s-i "%s%%%id.%s"  -vcodec libx264 %stimelapse.mp4
 
         60 FPS:  
-           ffmpeg -start_number %s -i "%s_0%id.%s" -filter:v "setpts=0.5*PTS" -vcodec libx264 -r 60 output.mp4'
-""" % (self._ind_start, self._prefix, self._digits, self._img_ext, self._ind_start, self._prefix, self._digits,
-       self._img_ext,))
+           ffmpeg %s-i "%s%%%id.%s" -filter:v "setpts=0.5*PTS" -vcodec libx264 -r 60 %stimelapse.mp4
+""" % (starting, os.path.relpath(self._prefix), self._digits, self._img_ext, os.path.relpath(self._prefix),
+       starting, os.path.relpath(self._prefix), self._digits, self._img_ext, os.path.relpath(self._prefix)))
 
 
 def do_args():
@@ -205,5 +214,8 @@ if __name__ == "__main__":
                          resolution=resolution,
                          digits=args.digits,
                          img_ext=args.type)
-    camera.start()
+    try:
+        camera.start()
+    except:
+        pass
     camera.print_ffmpeg_instructions()
