@@ -99,7 +99,7 @@ class WebcamLapse(object):
         Start grabbing frames, reading keyboard input, etc.\
         """
         print("Recording (hit space on image window to toggle): %s" % (self._recording,))
-        last_t = time.time()
+        last_t = 0  # so first frame is taken when recording starts
         frame_time = time.time()
         num_frames = 0
         while True:
