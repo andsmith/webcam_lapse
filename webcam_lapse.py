@@ -42,8 +42,10 @@ class WebcamLapse(object):
         self._ind = self._ind_start
         self._img_ext = img_ext
 
-        while np.log10(self._ind_start) >= self._digits:
-            self._digits += 1
+        if self._ind_start>0:
+            while np.log10(self._ind_start) >= self._digits:
+                self._digits += 1
+        print("Running with %i, %i digits." % (self._ind_start, self._digits))
 
         self._cam_params = {}  # enum: value
         self._init_camera()
@@ -98,7 +100,7 @@ class WebcamLapse(object):
         """
         Start grabbing frames, reading keyboard input, etc.\
         """
-        print("Recording (hit space on image window to toggle): %s" % (self._recording,))
+        print("Recording (hit space on image window to toggle, Q to quit): %s" % (self._recording,))
         last_t = 0  # so first frame is taken when recording starts
         frame_time = time.time()
         num_frames = 0
